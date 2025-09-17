@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Anthropic Economic Index report: Uneven geographic and enterprise AI adoption</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font: Noto Serif SC (中文) & Inter (英文点缀) -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Framer Motion (Web) -->
+  <script src="https://unpkg.com/framer-motion@11.0.8/dist/framer-motion.umd.js"></script>
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/a2e0e6ad6f.js" crossorigin="anonymous"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --primary:#F05E1C;
+      --dark:#1f2937;
+      --ink:#0b0b0c;
+    }
+    html,body{scroll-behavior:smooth;background:#ffffff;color:#0b0b0c}
+    body{font-family:"Noto Serif SC","Songti SC",serif;}
+    .en{font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans",sans-serif;}
+    /* 版心与密度（信息饱和） */
+    .container-narrow{max-width:1200px;margin:0 auto;padding:16px}
+    .card{border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 2px rgba(0,0,0,.04);border-radius:14px;background:#fff}
+    .tight{padding:12px}
+    .h-tight>*+*{margin-top:8px}
+    .stroke-big{
+      -webkit-text-stroke: 2px var(--primary);
+      color:transparent;
+      text-shadow:0 0 0 rgba(0,0,0,0);
+    }
+    .outline-giant{font-size:clamp(72px,12vw,180px);line-height:0.9;font-weight:900;letter-spacing:-0.02em}
+    .subtle-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.15),transparent)}
+    .grid-12{display:grid;grid-template-columns:repeat(12, minmax(0,1fr));gap:16px}
+    .col-4{grid-column:span 4 / span 4}
+    .col-8{grid-column:span 8 / span 8}
+    .accent{color:var(--primary)}
+    .accent-bg{background:linear-gradient(180deg, rgba(240,94,28,0.10), rgba(240,94,28,0.04))}
+    .accent-ring{box-shadow:0 0 0 1px rgba(240,94,28,0.35) inset}
+    .chip{font-size:12px;padding:2px 8px;border:1px solid rgba(0,0,0,.1);border-radius:999px;background:#fff}
+    a:focus,button:focus{outline:3px solid var(--primary);outline-offset:2px}
+    a:hover{text-decoration:underline}
+    /* Hover 微缩放 */
+    .hover-zoom{transition:transform .2s ease, box-shadow .2s ease}
+    .hover-zoom:hover{transform:scale(1.02)}
+    /* Mid-Breaker */
+    .mid-breaker{background:linear-gradient(120deg, rgba(240,94,28,.08), rgba(240,94,28,.02));border-top:1px solid rgba(0,0,0,.06);border-bottom:1px solid rgba(0,0,0,.06)}
+    /* Deep Footer */
+    .deep{background:#1f2937;color:#f9fafb}
+    .deep a{color:#f9fafb;text-decoration:underline}
+    /* 打印友好 */
+    @media print{
+      .no-print{display:none!important}
+      body{background:#fff}
+      .card{box-shadow:none;border:1px solid #ddd}
+      a{text-decoration:none}
+    }
+    /* 访问性：减少动态 */
+    @media (prefers-reduced-motion: reduce){
+      .motion{transition:none!important;animation:none!important}
+    }
+    /* 表格最简样式 */
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{border-bottom:1px solid rgba(0,0,0,.08);padding:8px 6px;text-align:left}
+    th{font-weight:700}
+    /* 关系图统一线型 */
+    .rel-line{stroke:rgba(0,0,0,.4);stroke-width:1.8;fill:none}
+    .rel-node{fill:#fff;stroke:rgba(0,0,0,.5);stroke-width:1.4}
+  </style>
+</head>
+<body>
+
+<script>
+  // 全局配置对象
+  const CONFIG = { primaryColor: '#F05E1C', langMix: 'CN:EN = 80:20', density: 'cozy' };
+</script>
+
+<!-- =============== Header（刊头） =============== -->
+<header class="container-narrow" aria-labelledby="site-title">
+  <div class="py-6">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h1 id="site-title" class="text-3xl md:text-5xl font-extrabold tracking-tight" style="letter-spacing:-0.01em">
+          Anthropic Economic Index 报告
+        </h1>
+        <h2 class="en text-2xl md:text-3xl font-bold text-neutral-700 mt-2" style="letter-spacing:-0.005em">
+          Uneven geographic & enterprise AI adoption
+        </h2>
+      </div>
+      <div class="no-print">
+        <button onclick="exportHTML()" class="chip hover-zoom en" aria-label="导出当前页面为HTML">
+          <i class="fa-solid fa-download"></i> Export HTML
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+      <div class="chip">发布日期：2025-09-16</div>
+      <div class="chip">来源：Anthropic Research</div>
+      <div class="chip en">Design DNA: print-in-digital · high-density · outline anchors</div>
+    </div>
+
+    <div class="mt-6 subtle-divider"></div>
+
+  </div>
+</header>
+
+<!-- =============== Main Body（全宽布局） =============== -->
+<main class="container-narrow" aria-label="Main Body">
+  <!-- 核心信息区（全宽） -->
+  <section class="h-tight">
+
+    <!-- 模块 1：AI 采用速度与历史对比 -->
+    <article id="mod-1" class="card tight hover-zoom mb-6" aria-labelledby="mod-1-title">
+      <div class="flex items-center justify-between">
+        <h3 id="mod-1-title" class="text-2xl md:text-3xl font-extrabold">一、AI 采用的速度与历史对比</h3>
+        <span class="chip en">Header→Main</span>
+      </div>
+      <div class="mt-2 text-[15px] leading-snug space-y-2">
+        <blockquote class="border-l-4 pl-3 border-[var(--primary)] text-neutral-700">
+          “AI differs from prior technologies in its unprecedented adoption speed. In the US alone, 40% of employees report using AI at work, up from 20% in 2023.” <span class="en">— AEI, Sep 2025</span>
+        </blockquote>
+        <ul class="list-disc ml-5">
+          <li><strong>AI 采用速度</strong>：仅需 10 年达到 40% 工作场景采用率，速度前所未有。</li>
+          <li><strong>历史对比</strong>：互联网需要 20 年，PC 需要 25 年，电气化需要 30 年才能达到相同采用率。</li>
+          <li><strong>增速优势</strong>：AI 的采用速度是互联网的 2 倍，是 PC 的 2.5 倍，是电气化的 3 倍。</li>
+          <li><strong>驱动因素</strong>：自然语言易用性、兼容既有基础设施、模型快速进步。</li>
+        </ul>
+
+        <!-- 可视化：采用时间对比柱状图 -->
+        <div class="mt-3">
+          <canvas id="chartAdoption" aria-label="AI 与历史技术达到40%采用率所需时间对比" role="img"></canvas>
+        </div>
+      </div>
+    </article>
+
+    <!-- 模块 2：Claude.ai 使用模式变化 -->
+    <article id="mod-2" class="card tight hover-zoom mb-6" aria-labelledby="mod-2-title">
+      <div class="flex items-center justify-between">
+        <h3 id="mod-2-title" class="text-2xl md:text-3xl font-extrabold">二、Claude.ai 使用模式变化</h3>
+        <span class="chip en">Main</span>
+      </div>
+      <div class="mt-2 text-[15px] leading-snug space-y-2">
+        <blockquote class="border-l-4 pl-3 border-[var(--primary)] text-neutral-700">
+          “Educational tasks surged from 9.3% to 12.4%, and scientific tasks from 6.3% to 7.2%… ‘Directive’ conversations jumped from 27% to 39%.”
+          <span class="en">— AEI, Sep 2025</span>
+        </blockquote>
+        <ul class="list-disc ml-5">
+          <li>教育类任务占比显著提升（~9.3% → ~12.4%）。</li>
+          <li>科研类任务占比上升（~6.3% → ~7.2%）。</li>
+          <li>“指令型/整任务委托”对话占比提高（27% → 39%）。</li>
+          <li>含义：从“辅助工具”向“自动化执行者”形态迁移。</li>
+        </ul>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+          <div class="card tight">
+            <h4 class="font-bold">指令型对话占比</h4>
+            <canvas id="chartDirective"></canvas>
+          </div>
+          <div class="card tight">
+            <h4 class="font-bold">教育/科研占比变化</h4>
+            <canvas id="chartEduSci"></canvas>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 模块 3：地理扩散与不平等（AUI） -->
+    <article id="mod-3" class="card tight hover-zoom mb-6" aria-labelledby="mod-3-title">
+      <div class="flex items-center justify-between">
+        <h3 id="mod-3-title" class="text-2xl md:text-3xl font-extrabold">三、地理扩散与不平等（AUI 指数）</h3>
+        <span class="chip en">Main</span>
+      </div>
+      <div class="mt-2 text-[15px] leading-snug space-y-2">
+        <blockquote class="border-l-4 pl-3 border-[var(--primary)] text-neutral-700">
+          “The AUI strongly correlates with income across countries… Singapore 4.6×, Canada 2.9×… India 0.27×, Nigeria 0.2×.”
+          <span class="en">— AEI, Sep 2025</span>
+        </blockquote>
+
+        <!-- 结构化表（自动判断采用表格） -->
+        <div class="overflow-x-auto card tight">
+          <table aria-label="AUI 示例国家对比表">
+            <thead>
+              <tr><th>国家/地区</th><th>AUI（相对值）</th><th>收入相关性</th><th>解读</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>新加坡</td><td>4.6×</td><td>高</td><td>高收入 → 高 AUI，采用广泛，增强型用法更多。</td></tr>
+              <tr><td>加拿大</td><td>2.9×</td><td>高</td><td>成熟市场，教育/科研/知识密集行业采用领先。</td></tr>
+              <tr><td>印度</td><td>0.27×</td><td>低</td><td>低 AUI 倾向自动化型任务。</td></tr>
+              <tr><td>尼日利亚</td><td>0.2×</td><td>低</td><td>扩散不足，潜在“AI 不平等”风险显现。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul class="list-disc ml-5">
+          <li>高收入国家/地区 AUI 显著更高。</li>
+          <li>美国州差异：如 DC（~3.82×）、犹他州（~3.78×）等。</li>
+          <li>低 AUI 地区更偏自动化，高 AUI 地区更偏人机增强。</li>
+          <li>政策要点：防止“富者更富，穷者更穷”的扩散鸿沟。</li>
+        </ul>
+
+        <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="card tight">
+            <h4 class="font-bold">AUI 对比（示意）</h4>
+            <canvas id="chartAUI"></canvas>
+          </div>
+          <div class="card tight">
+            <h4 class="font-bold">关系图：AUI ↔ 收入 ↔ 使用模式</h4>
+            <!-- 勾线风格 SVG 1 -->
+            <svg viewBox="0 0 480 220" class="w-full h-auto">
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L6,3 z" fill="rgba(0,0,0,.5)"></path>
+                </marker>
+              </defs>
+              <rect x="24" y="24" width="130" height="48" rx="10" class="rel-node"></rect>
+              <text x="40" y="54" font-size="14">收入水平</text>
+
+              <rect x="188" y="24" width="130" height="48" rx="10" class="rel-node"></rect>
+              <text x="204" y="54" font-size="14">AUI（采用强度）</text>
+
+              <rect x="352" y="24" width="110" height="48" rx="10" class="rel-node"></rect>
+              <text x="368" y="54" font-size="14">使用模式</text>
+
+              <line x1="154" y1="48" x2="188" y2="48" class="rel-line" marker-end="url(#arrow)"></line>
+              <line x1="318" y1="48" x2="352" y2="48" class="rel-line" marker-end="url(#arrow)"></line>
+
+              <rect x="188" y="124" width="130" height="48" rx="10" class="rel-node"></rect>
+              <text x="206" y="154" font-size="14">不平等风险</text>
+
+              <line x1="253" y1="72" x2="253" y2="124" class="rel-line" marker-end="url(#arrow)"></line>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 模块 4：企业级 API 部署 -->
+    <article id="mod-4" class="card tight hover-zoom mb-6" aria-labelledby="mod-4-title">
+      <div class="flex items-center justify-between">
+        <h3 id="mod-4-title" class="text-2xl md:text-3xl font-extrabold">四、企业级 API 部署（首次公开数据）</h3>
+        <span class="chip en">Main</span>
+      </div>
+      <div class="mt-2 text-[15px] leading-snug space-y-2">
+        <blockquote class="border-l-4 pl-3 border-[var(--primary)] text-neutral-700">
+          “77% of business uses involve automation usage patterns… Capabilities seem to matter more than cost in shaping business deployment.” <span class="en">— AEI, Sep 2025</span>
+        </blockquote>
+
+        <!-- 结构化表（自动判断采用表格） -->
+        <div class="overflow-x-auto card tight">
+          <table aria-label="企业 API 部署要点表">
+            <thead>
+              <tr><th>维度</th><th>要点</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>使用形态</td><td>自动化模式占比 ~77%（Claude.ai 用户约 ~50%）。</td></tr>
+              <tr><td>场景结构</td><td>编程、办公/行政更高；教育与写作在企业 API 中相对降低。</td></tr>
+              <tr><td>价格敏感性</td><td>能力/可行性优先于成本。</td></tr>
+              <tr><td>部署瓶颈</td><td>复杂场景需要丰富上下文；数据治理与组织投入成为前置条件。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+          <div class="card tight">
+            <h4 class="font-bold">企业使用形态</h4>
+            <canvas id="chartAutomation"></canvas>
+          </div>
+          <div class="card tight">
+            <h4 class="font-bold">关系图：企业部署驱动</h4>
+            <!-- 勾线风格 SVG 2 -->
+            <svg viewBox="0 0 500 220" class="w-full h-auto">
+              <defs>
+                <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L6,3 z" fill="rgba(0,0,0,.5)"></path>
+                </marker>
+              </defs>
+              <rect x="28" y="24" width="135" height="48" rx="10" class="rel-node"></rect>
+              <text x="44" y="54" font-size="14">能力（Cap）</text>
+
+              <rect x="192" y="24" width="135" height="48" rx="10" class="rel-node"></rect>
+              <text x="208" y="54" font-size="14">成本（Cost）</text>
+
+              <rect x="356" y="24" width="120" height="48" rx="10" class="rel-node"></rect>
+              <text x="370" y="54" font-size="14">可行性</text>
+
+              <rect x="192" y="124" width="135" height="48" rx="10" class="rel-node"></rect>
+              <text x="204" y="154" font-size="14">组织投入/治理</text>
+
+              <line x1="163" y1="48" x2="192" y2="48" class="rel-line" marker-end="url(#arrow2)"></line>
+              <line x1="327" y1="48" x2="356" y2="48" class="rel-line" marker-end="url(#arrow2)"></line>
+              <line x1="260" y1="72" x2="260" y2="124" class="rel-line" marker-end="url(#arrow2)"></line>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 模块 5：研究与政策启示 -->
+    <article id="mod-5" class="card tight hover-zoom mb-6" aria-labelledby="mod-5-title">
+      <div class="flex items-center justify-between">
+        <h3 id="mod-5-title" class="text-2xl md:text-3xl font-extrabold">五、研究与政策启示（开放数据）</h3>
+        <span class="chip en">Main → Mid-Breaker</span>
+      </div>
+      <div class="mt-2 text-[15px] leading-snug space-y-2">
+        <blockquote class="border-l-4 pl-3 border-[var(--primary)] text-neutral-700">
+          “We open-sourced the underlying data… Key questions: What are the labor market consequences? What determines adoption across countries? Why can firms automate some tasks and not others?”
+          <span class="en">— AEI, Sep 2025</span>
+        </blockquote>
+        <ul class="list-disc ml-5">
+          <li>开放数据：Claude.ai + API 使用数据，鼓励独立学术研究。</li>
+          <li>关键研究问题：
+            <ul class="list-[circle] ml-5">
+              <li>劳动力市场影响与职业结构变化？</li>
+              <li>国家/地区 adoption 决定因素？</li>
+              <li>企业能自动化某些任务而非普遍自动化的原因？</li>
+            </ul>
+          </li>
+          <li>政策含义：把握扩散节奏、补贴治理能力建设，避免“AI 不平等”。</li>
+        </ul>
+
+        <div class="card tight mt-2">
+          <h4 class="font-bold">研究问题关系草图</h4>
+          <!-- 勾线风格 SVG 3 -->
+          <svg viewBox="0 0 540 240" class="w-full h-auto">
+            <defs>
+              <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="rgba(0,0,0,.5)"></path>
+              </marker>
+            </defs>
+            <rect x="28" y="30" width="150" height="54" rx="12" class="rel-node"></rect>
+            <text x="52" y="62" font-size="14">劳动力市场</text>
+
+            <rect x="210" y="30" width="150" height="54" rx="12" class="rel-node"></rect>
+            <text x="238" y="62" font-size="14">国家采纳因素</text>
+
+            <rect x="392" y="30" width="120" height="54" rx="12" class="rel-node"></rect>
+            <text x="404" y="62" font-size="14">企业自动化</text>
+
+            <line x1="178" y1="57" x2="210" y2="57" class="rel-line" marker-end="url(#arrow3)"></line>
+            <line x1="360" y1="57" x2="392" y2="57" class="rel-line" marker-end="url(#arrow3)"></line>
+
+            <rect x="210" y="140" width="150" height="54" rx="12" class="rel-node"></rect>
+            <text x="242" y="172" font-size="14">政策工具箱</text>
+
+            <line x1="285" y1="84" x2="285" y2="140" class="rel-line" marker-end="url(#arrow3)"></line>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+  </section>
+</main>
+
+<!-- =============== Mid-Breaker（中段分隔区） =============== -->
+<section class="mid-breaker mt-8" aria-label="Mid Breaker">
+  <div class="container-narrow py-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card tight hover-zoom">
+        <h4 class="text-lg font-extrabold">术语卡｜AUI</h4>
+        <p class="mt-1 text-[15px] leading-snug">
+          <strong>AUI（Adoption Use Index）</strong>：衡量一地 AI 使用强度与模式的复合指标，报告发现与收入高度相关。
+        </p>
+      </div>
+      <div class="card tight hover-zoom">
+        <h4 class="text-lg font-extrabold">术语卡｜Directive</h4>
+        <p class="mt-1 text-[15px] leading-snug">
+          <strong>Directive 对话</strong>：用户将完整任务直接委托给模型处理，体现从辅助到自动化的迁移趋势。
+        </p>
+      </div>
+      <div class="card tight hover-zoom">
+        <h4 class="text-lg font-extrabold">引用溯源</h4>
+        <ul class="list-disc ml-5 text-[15px] leading-snug">
+          <li>Anthropic Research：<span class="en">Anthropic Economic Index — September 2025</span></li>
+          <li>引文基于报告原文措辞（采用率、AUI、企业 API 统计等）。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============== Dark Footer（深色页脚） =============== -->
+<footer class="deep mt-0" aria-labelledby="footer-title">
+  <div class="container-narrow py-10">
+    <h2 id="footer-title" class="text-2xl md:text-3xl font-extrabold">总结性观点 & CTA</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <div class="card tight bg-white/5 border border-white/10">
+        <h4 class="font-bold">速度前所未有</h4>
+        <p class="text-sm mt-1 leading-snug">AI 采用曲线极陡，短期即显著重塑生产方式与职业结构。</p>
+      </div>
+      <div class="card tight bg-white/5 border border-white/10">
+        <h4 class="font-bold">扩散不均衡</h4>
+        <p class="text-sm mt-1 leading-snug">AUI 与收入相关，高 AUI 地区更偏增强式，需防范“AI 不平等”。</p>
+      </div>
+      <div class="card tight bg-white/5 border border-white/10">
+        <h4 class="font-bold">企业部署逻辑</h4>
+        <p class="text-sm mt-1 leading-snug">能力/可行性优先于成本，数据治理是落地的关键前置。</p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-3 items-center">
+      <a href="#mod-1" class="chip">返回顶部 · 模块 1–5</a>
+      <button onclick="exportHTML()" class="chip hover-zoom en"><i class="fa-solid fa-download"></i> Export HTML</button>
+    </div>
+
+    <div class="mt-6 subtle-divider"></div>
+    <p class="mt-3 text-xs en opacity-80">
+      © 2025 Notes on AEI (Study use). Typography: Noto Serif SC & Inter. Theme color <code>#F05E1C</code>. Accessibility: keyboard focus, high contrast footer, print-friendly.
+    </p>
+  </div>
+</footer>
+
+<!-- ======= 交互 / 动效 / 图表脚本（内联） ======= -->
+<script>
+  // 主题色
+  document.documentElement.style.setProperty('--primary', CONFIG.primaryColor || '#F05E1C');
+
+  // IntersectionObserver + 轻动效（prefers-reduced-motion 友好）
+  (function(){
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce) return;
+    const els = document.querySelectorAll('.hover-zoom,.card,.outline-giant');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.style.transition = 'transform .6s ease, opacity .6s ease';
+          e.target.style.transform = 'translateY(0px) scale(1)';
+          e.target.style.opacity = 1;
+        }
+      });
+    }, {threshold:.1});
+    els.forEach(el=>{
+      el.style.opacity=.001;
+      el.style.transform='translateY(8px) scale(0.995)';
+      io.observe(el);
+    });
+  })();
+
+  // Chart.js 统一样式
+  function baseChart(ctx,type,data,options={}){
+    return new Chart(ctx,{type,data,options:{
+      responsive:true,
+      plugins:{legend:{display:true,labels:{font:{family:'Inter'}}}},
+      scales:{x:{ticks:{font:{family:'Inter'}}},y:{ticks:{font:{family:'Inter'}}}},
+      ...options
+    }});
+  }
+
+  // 图表 1：AI 与历史技术达到40%采用率所需时间对比
+  baseChart(document.getElementById('chartAdoption'),'bar',{
+    labels:['AI','互联网','PC','电气化'],
+    datasets:[
+      {
+        label: '达到40%采用率所需时间（年）',
+        data: [10, 20, 25, 30],
+        backgroundColor: [
+          CONFIG.primaryColor,
+          '#2563eb', 
+          '#059669', 
+          '#7c3aed'
+        ],
+        borderColor: [
+          CONFIG.primaryColor,
+          '#2563eb', 
+          '#059669', 
+          '#7c3aed'
+        ],
+        borderWidth: 2
+      }
+    ]
+  }, {
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: '技术类型',
+          font: { family: 'Inter', size: 12, weight: 'bold' }
+        },
+        ticks: { font: { family: 'Inter', size: 11 } }
+      },
+      y: {
+        title: {
+          display: true,
+          text: '所需时间（年）',
+          font: { family: 'Inter', size: 12, weight: 'bold' }
+        },
+        min: 0,
+        max: 35,
+        ticks: { 
+          font: { family: 'Inter', size: 11 },
+          callback: function(value) { return value + '年'; }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'AI vs 历史技术：达到40%采用率所需时间对比',
+        font: { family: 'Inter', size: 14, weight: 'bold' },
+        padding: { top: 10, bottom: 20 }
+      },
+      datalabels: {
+        display: true,
+        color: '#000',
+        font: { family: 'Inter', size: 12, weight: 'bold' },
+        formatter: function(value) { return value + '年'; },
+        anchor: 'end',
+        offset: -5
+      }
+    }
+  });
+
+  // 图表 2：指令型对话占比
+  baseChart(document.getElementById('chartDirective'),'bar',{
+    labels:['2023','2025'],
+    datasets:[
+      {label:'Directive（整任务委托）', data:[27,39], backgroundColor:CONFIG.primaryColor}
+    ]
+  }, {plugins:{legend:{display:false}}});
+
+  // 图表 3：教育/科研占比变化
+  baseChart(document.getElementById('chartEduSci'),'bar',{
+    labels:['教育','科研'],
+    datasets:[
+      {label:'2023', data:[9.3,6.3], backgroundColor:'rgba(0,0,0,.15)'},
+      {label:'2025', data:[12.4,7.2], backgroundColor:CONFIG.primaryColor}
+    ]
+  });
+
+  // 图表 4：AUI 国家对比（示意）
+  baseChart(document.getElementById('chartAUI'),'bar',{
+    labels:['新加坡','加拿大','印度','尼日利亚'],
+    datasets:[
+      {label:'AUI（×）', data:[4.6,2.9,0.27,0.2], backgroundColor:CONFIG.primaryColor}
+    ]
+  }, {plugins:{legend:{display:false}}});
+
+  // 图表 5：企业使用形态（自动化 77% / 其他 23%）
+  baseChart(document.getElementById('chartAutomation'),'doughnut',{
+    labels:['自动化（API）','其他（增强/混合）'],
+    datasets:[{data:[77,23], backgroundColor:[CONFIG.primaryColor,'rgba(0,0,0,.12)']}]
+  }, {plugins:{legend:{position:'bottom'}}});
+
+  // 导出功能：下载当前页面为 HTML
+  function exportHTML(){
+    const blob = new Blob([document.documentElement.outerHTML], {type:'text/html;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'medsw_guidance_notes.html';
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }
+  window.exportHTML = exportHTML;
+</script>
+
+</body>
+</html>
